@@ -134,13 +134,16 @@ resolveArguments[assoc_Association]:=Splice@Table[
 
 
 setupDashboardTimeUpdater[]:=With[{$cliPath=$cliPath, $pluginName=$pluginName, $intervalInSecond=$intervalInSecond},
-  SessionSubmit[
+  LocalSubmit[
     ScheduledTask[
-      StringTrim@RunProcess[{
-        $cliPath,
-        "--plugin", $pluginName,
-        "--today"
-      }, "StandardOutput"],
+      WithCleanup[
+        StringTrim@RunProcess[{
+          $cliPath,
+          "--plugin", $pluginName,
+          "--today"
+        }, "StandardOutput"],
+        Pause[0.1] (* workaround to resume the task on the standalone kernel after RunProcess. *)
+      ],
       Quantity[$intervalInSecond, "Seconds"]
     ],
     HandlerFunctions -> <|
