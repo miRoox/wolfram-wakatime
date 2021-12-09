@@ -31,6 +31,8 @@ Options[SendHeartbeat]:={
 SetAttributes[$WakaTimeEnabled, {ReadProtected}]
 SetAttributes[$WakaTimeApiKey, {ReadProtected}]
 SetAttributes[$WakaTimeDebug, {ReadProtected}]
+SetAttributes[$LatestDashboardTime, {ReadProtected}]
+SetAttributes[SetupWakatimeAsync, {ReadProtected}]
 SetAttributes[SendHeartbeat, {ReadProtected}]
 
 
