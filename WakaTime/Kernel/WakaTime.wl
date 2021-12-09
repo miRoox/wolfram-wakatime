@@ -133,15 +133,18 @@ resolveArguments[assoc_Association]:=Splice@Table[
 ]
 
 
-setupDashboardTimeUpdater[]:=With[{$cliPath=$cliPath, $pluginName=$pluginName, $intervalInSecond=$intervalInSecond},
+setupDashboardTimeUpdater[]:=With[
+  {$cliPath=$cliPath, $pluginName=$pluginName, $intervalInSecond=$intervalInSecond},
+  {getter:=StringTrim@RunProcess[{
+      $cliPath,
+      "--plugin", $pluginName,
+      "--today"
+    }, "StandardOutput"]
+  },
   LocalSubmit[
     ScheduledTask[
       WithCleanup[
-        StringTrim@RunProcess[{
-          $cliPath,
-          "--plugin", $pluginName,
-          "--today"
-        }, "StandardOutput"],
+        getter,
         Pause[0.1] (* workaround to resume the task on the standalone kernel after RunProcess. *)
       ],
       Quantity[$intervalInSecond, "Seconds"]
@@ -153,7 +156,8 @@ setupDashboardTimeUpdater[]:=With[{$cliPath=$cliPath, $pluginName=$pluginName, $
       ]&)
     |>,
     HandlerFunctionsKeys -> "EvaluationResult"
-  ]
+  ];
+  $LatestDashboardTime:=$LatestDashboardTime=getter
 ]
 
 
