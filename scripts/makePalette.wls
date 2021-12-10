@@ -14,16 +14,30 @@ Needs["MirooxUtils`"]
 $path=FileNameJoin@{DirectoryName[$InputFileName,2],"WakaTime","FrontEnd","Palettes","WakaTime.nb"}
 
 palette=MakePalette[
-  Grid[{{
-    Tooltip[
-      Dynamic[$LatestDashboardTime],
-      Row@{"Today you've spent ", Dynamic[$LatestDashboardTime], "."}
-    ]
-  }}],
+  DynamicModule[{init=False, gotTime=False},
+    PaneSelector[{
+      False -> "Initializing...",
+      True -> Grid[{{
+        PaneSelector[{
+          True -> Tooltip[
+            Dynamic[$LatestDashboardTime],
+            Row@{"Today you've spent ", Dynamic[$LatestDashboardTime], "."}
+          ],
+          False -> "Cannot get dashboard time!"
+        }, Dynamic[gotTime]]
+      }}]
+    }, Dynamic[init]],
+    SynchronousInitialization -> False,
+    Initialization :> (
+      Needs["WakaTime`"];
+      SetupWakatimeAsync[];
+      init=True;
+      gotTime = StringQ[$LatestDashboardTime];
+    )
+  ],
   "WakaTime",
   "NotebookOptions" -> {
-    TaggingRules -> {},
-    NotebookDynamicExpression :> Refresh[Needs["WakaTime`"], None]
+    TaggingRules -> {}
   }
 ];
 Block[{$ContextPath=DeleteCases[$ContextPath, "WakaTime`"]},
