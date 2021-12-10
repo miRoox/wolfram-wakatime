@@ -43,31 +43,31 @@ SetAttributes[SendHeartbeat, {ReadProtected}]
 Begin["`Private`"]
 
 
-PersistentValue["WakaTime/Enabled", "Installation"]=True
+PersistentSymbol["WakaTime/Enabled", "Installation"]=True
 $WakaTimeEnabledOverriding=False
-$WakaTimeEnabled:=$WakaTimeEnabled=PersistentValue["WakaTime/Enabled"]
+$WakaTimeEnabled:=$WakaTimeEnabled=PersistentSymbol["WakaTime/Enabled"]
 $WakaTimeEnabled/:Set[$WakaTimeEnabled,val_]/;!TrueQ@$WakaTimeEnabledOverriding:=Enclose@Block[{$WakaTimeEnabledOverriding=True},
   $WakaTimeEnabled=ConfirmBy[val, BooleanQ];
-  PersistentValue["WakaTime/Enabled"]=$WakaTimeEnabled
+  PersistentSymbol["WakaTime/Enabled"]=$WakaTimeEnabled
 ]
 
 
 (* TODO: config read/write *)
-PersistentValue["WakaTime/APIKey", "Installation"]=None
+PersistentSymbol["WakaTime/APIKey", "Installation"]=None
 $WakaTimeApiKeyOverriding=False
-$WakaTimeApiKey:=$WakaTimeApiKey=PersistentValue["WakaTime/APIKey"]
+$WakaTimeApiKey:=$WakaTimeApiKey=PersistentSymbol["WakaTime/APIKey"]
 $WakaTimeApiKey/:Set[$WakaTimeApiKey,val_]/;!TrueQ@$WakaTimeApiKeyOverriding:=Enclose@Block[{$WakaTimeApiKeyOverriding=True},
   $WakaTimeApiKey=ConfirmBy[val, StringMatchQ[RegularExpression["^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$"], IgnoreCase -> True]];
-  PersistentValue["WakaTime/APIKey"]=$WakaTimeApiKey
+  PersistentSymbol["WakaTime/APIKey"]=$WakaTimeApiKey
 ]
 
 
-PersistentValue["WakaTime/DebugMode", "Installation"]=False
+PersistentSymbol["WakaTime/DebugMode", "Installation"]=False
 $WakaTimeDebugOverriding=False
-$WakaTimeDebug:=$WakaTimeDebug=PersistentValue["WakaTime/DebugMode"]
+$WakaTimeDebug:=$WakaTimeDebug=PersistentSymbol["WakaTime/DebugMode"]
 $WakaTimeDebug/:Set[$WakaTimeDebug,val_]/;!TrueQ@$WakaTimeDebugOverriding:=Enclose@Block[{$WakaTimeDebugOverriding=True},
   $WakaTimeDebug=ConfirmBy[val, BooleanQ];
-  PersistentValue["WakaTime/DebugMode"]=$WakaTimeDebug
+  PersistentSymbol["WakaTime/DebugMode"]=$WakaTimeDebug
 ]
 
 
