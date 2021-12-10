@@ -9,20 +9,20 @@ Paclet[
   Creator -> "miRoox",
   URL -> "https://github.com/miRoox/wolfram-wakatime",
   Extensions -> {
-	{"Kernel", 
-	  Context -> "WakaTime`",
-	  Root -> "Kernel",
-    Symbols -> {
-      "WakaTime`WakaTime",
-      "WakaTime`SetupWakatimeAsync",
-      "WakaTime`SendHeartbeat",
-      "WakaTime`$LatestDashboardTime",
-      "WakaTime`$WakaTimeEnabled",
-      "WakaTime`$WakaTimeApiKey",
-      "WakaTime`$WakaTimeDebug"
-    }
-	},
-	{"FrontEnd", Prepend->True}
+    {"Kernel", 
+      Context -> "WakaTime`",
+      Root -> "Kernel",
+      Symbols -> {
+        "WakaTime`WakaTime",
+        "WakaTime`SetupWakatimeAsync",
+        "WakaTime`SendHeartbeat",
+        "WakaTime`$LatestDashboardTime",
+        "WakaTime`$WakaTimeEnabled",
+        "WakaTime`$WakaTimeApiKey",
+        "WakaTime`$WakaTimeDebug"
+      }
+    },
+    {"FrontEnd", Prepend->True}
   }
 ]
 
