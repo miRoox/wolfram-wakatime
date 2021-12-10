@@ -135,31 +135,34 @@ resolveArguments[assoc_Association]:=Splice@Table[
 ]
 
 
-setupDashboardTimeUpdater[]:=With[
-  {$cliPath=$cliPath, $pluginName=$pluginName, $intervalInSecond=$intervalInSecond},
-  {getter:=StringTrim@RunProcess[{
-      $cliPath,
-      "--plugin", $pluginName,
-      "--today"
-    }, "StandardOutput"]
-  },
-  LocalSubmit[
-    ScheduledTask[
-      WithCleanup[
-        getter,
-        Pause[0.1] (* workaround to resume the task on the standalone kernel after RunProcess. *)
+$updaterTask = None
+setupDashboardTimeUpdater[]:=If[!MatchQ[$updaterTask, _TaskObject] || $updaterTask@"TaskStatus" =!= "Running",
+  With[
+    {$cliPath=$cliPath, $pluginName=$pluginName, $intervalInSecond=$intervalInSecond},
+    {getter:=StringTrim@RunProcess[{
+        $cliPath,
+        "--plugin", $pluginName,
+        "--today"
+      }, "StandardOutput"]
+    },
+    $updaterTask = LocalSubmit[
+      ScheduledTask[
+        WithCleanup[
+          getter,
+          Pause[0.1] (* workaround to resume the task on the standalone kernel after RunProcess. *)
+        ],
+        Quantity[$intervalInSecond, "Seconds"]
       ],
-      Quantity[$intervalInSecond, "Seconds"]
-    ],
-    HandlerFunctions -> <|
-      "ResultReceived" -> (If[
-        StringQ[#EvaluationResult],
-        $LatestDashboardTime=#EvaluationResult
-      ]&)
-    |>,
-    HandlerFunctionsKeys -> "EvaluationResult"
-  ];
-  $LatestDashboardTime:=$LatestDashboardTime=getter
+      HandlerFunctions -> <|
+        "ResultReceived" -> (If[
+          StringQ[#EvaluationResult],
+          $LatestDashboardTime=#EvaluationResult
+        ]&)
+      |>,
+      HandlerFunctionsKeys -> "EvaluationResult"
+    ];
+    $LatestDashboardTime:=$LatestDashboardTime=getter
+  ]
 ]
 
 
@@ -189,14 +192,14 @@ eventHandler/:RuleDelayed[event_, eventHandler[isWrite_]]:=RuleDelayed[event,
     Inherited
   ]
 ]
-setupFrontEnd[]:=(
+setupFrontEnd[]:=If[CurrentValue[$FrontEndSession, FrontEndEventActions] === None,
   CurrentValue[$FrontEndSession, FrontEndEventActions]={
     PassEventsDown -> True,
     "KeyDown" :> eventHandler[False],
     {"MenuCommand", "Save"} :> eventHandler[True]
   };
   (* TODO: AutoloadPath *)
-)
+]
 
 
 SetupWakatimeAsync[]:=(
