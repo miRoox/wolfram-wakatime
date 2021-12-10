@@ -8,6 +8,8 @@ Paclet[
   Loading -> Automatic,
   Creator -> "miRoox",
   URL -> "https://github.com/miRoox/wolfram-wakatime",
+  Thumbnail -> "Logo.png",
+  "Icon" -> "Logo.png",
   Extensions -> {
     {"Kernel", 
       Context -> "WakaTime`",
