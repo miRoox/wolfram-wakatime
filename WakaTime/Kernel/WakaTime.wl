@@ -147,12 +147,9 @@ setupDashboardTimeUpdater[]:=If[!MatchQ[$updaterTask, _TaskObject] || $updaterTa
         "--today"
       }, "StandardOutput"]
     },
-    $updaterTask = LocalSubmit[
+    $updaterTask = SessionSubmit[
       ScheduledTask[
-        WithCleanup[
-          getter,
-          Pause[0.1] (* workaround to resume the task on the standalone kernel after RunProcess. *)
-        ],
+        getter,
         Quantity[$intervalInSecond, "Seconds"]
       ],
       HandlerFunctions -> <|
@@ -161,7 +158,8 @@ setupDashboardTimeUpdater[]:=If[!MatchQ[$updaterTask, _TaskObject] || $updaterTa
           $LatestDashboardTime=#EvaluationResult
         ]&)
       |>,
-      HandlerFunctionsKeys -> "EvaluationResult"
+      HandlerFunctionsKeys -> "EvaluationResult",
+      Method -> "Idle"
     ];
     $LatestDashboardTime:=$LatestDashboardTime=getter
   ]
