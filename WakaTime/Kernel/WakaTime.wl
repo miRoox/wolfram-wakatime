@@ -113,7 +113,8 @@ $lastProcess=None
 
 SendHeartbeat[opts:OptionsPattern[]]:=If[FileExistsQ@$cliPath,
   iSendHeartbeat@Merge[{Options[SendHeartbeat], opts}, Last],
-  Once[Message[WakaTime::nocli]]
+  Once[Message[WakaTime::nocli]];
+  $Failed
 ]
 iSendHeartbeat[assoc_Association]:=If[assoc@"entity"=!=$lastSentFile || UnixTime[]-$lastSentTime>=$intervalInSecond || assoc@"write",
   $lastProcess=StartProcess@{
@@ -124,6 +125,7 @@ iSendHeartbeat[assoc_Association]:=If[assoc@"entity"=!=$lastSentFile || UnixTime
   };
   $lastSentTime=UnixTime[];
   $lastSentFile=assoc@"entity";
+  $lastProcess
 ]
 resolveArguments[assoc_Association]:=Splice@Table[
   Replace[assoc[k],{
