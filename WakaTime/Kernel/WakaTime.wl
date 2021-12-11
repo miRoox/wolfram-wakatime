@@ -11,6 +11,7 @@ WakaTime::usage="Common message placeholder.";
 $WakaTimeEnabled::usage="$WakaTimeEnabled indicate if WakaTime is enabled.";
 $WakaTimeApiKey::usage="$WakaTimeApiKey is your WakaTime API key.";
 $WakaTimeDebug::usage="$WakaTimeDebug indicate whether WakaTime is on debug mode."
+$WakaTimeStatus::usage="$WakaTimeStatus represent status of WakaTime in current session."
 $LatestDashboardTime::usage="$LatestDashboardTime get latest dashboard time today."
 SetupWakatimeAsync::usage="SetupWakatimeAsync[] setup WakaTime environment asynchronously."
 
@@ -31,6 +32,7 @@ Options[SendHeartbeat]:={
 SetAttributes[$WakaTimeEnabled, {ReadProtected}]
 SetAttributes[$WakaTimeApiKey, {ReadProtected}]
 SetAttributes[$WakaTimeDebug, {ReadProtected}]
+SetAttributes[$WakaTimeStatus, {ReadProtected}]
 SetAttributes[$LatestDashboardTime, {ReadProtected}]
 SetAttributes[SetupWakatimeAsync, {ReadProtected}]
 SetAttributes[SendHeartbeat, {ReadProtected}]
@@ -69,6 +71,7 @@ With[{PersistentSymbol=If[TrueQ[$VersionNumber>=12.3], PersistentSymbol, Persist
 ]
 
 
+$WakaTimeStatus=None
 $LatestDashboardTime=Missing["NotAvailable", WakaTime]
 
 
@@ -205,6 +208,7 @@ SetupWakatimeAsync[]:=(
   setupDashboardTimeUpdater[];
   setupPreRead[];
   setupFrontEnd[];
+  $WakaTimeStatus="Ready"
 )
 
 

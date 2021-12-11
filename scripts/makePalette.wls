@@ -14,26 +14,36 @@ Needs["MirooxUtils`"]
 $path=FileNameJoin@{DirectoryName[$InputFileName,2],"WakaTime","FrontEnd","Palettes","WakaTime.nb"}
 
 palette=MakePalette[
-  DynamicModule[{init=False, gotTime=False},
-    PaneSelector[{
-      False -> "Initializing...",
-      True -> Grid[{{
-        PaneSelector[{
-          True -> Tooltip[
-            Dynamic[$LatestDashboardTime],
-            Row@{"Today you've spent ", Dynamic[$LatestDashboardTime], "."}
-          ],
-          False -> "Cannot get dashboard time!"
-        }, Dynamic[gotTime]]
-      }}]
-    }, Dynamic[init]],
+  DynamicModule[{gotTime=None},
+    PaneSelector[
+      {
+        "Ready" -> Grid[{{
+          PaneSelector[
+            {
+              True -> Tooltip[
+                Dynamic[$LatestDashboardTime],
+                Row@{"Today you've spent ", Dynamic[$LatestDashboardTime], "."}
+              ],
+              False -> "Cannot get dashboard time!"
+            },
+            Dynamic[gotTime],
+            "Initialized"
+          ]
+        }}],
+        $Failed -> "Cannot setup WakaTime!"
+      },
+      Dynamic[$WakaTimeStatus],
+      Row@{"Initializing", ProgressIndicator[Appearance -> "Ellipsis"]}
+    ],
     SynchronousInitialization -> False,
     Initialization :> (
       Needs["WakaTime`"];
-      SetupWakatimeAsync[];
-      init=True;
+      If[$WakaTimeStatus =!= "Ready",
+        SetupWakatimeAsync[];
+      ];
       gotTime = StringQ[$LatestDashboardTime];
-    )
+    ),
+    UnsavedVariables :> {gotTime}
   ],
   "WakaTime",
   "NotebookOptions" -> {
