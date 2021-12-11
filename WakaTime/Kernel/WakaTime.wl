@@ -190,7 +190,7 @@ eventHandler/:RuleDelayed[event_, eventHandler[isWrite_]]:=RuleDelayed[event,
     Inherited
   ]
 ]
-setupFrontEnd[]:=If[CurrentValue[$FrontEndSession, FrontEndEventActions] === None,
+setupFrontEnd[]:=If[$Notebooks && CurrentValue[$FrontEndSession, FrontEndEventActions] === None,
   CurrentValue[$FrontEndSession, FrontEndEventActions]={
     PassEventsDown -> True,
     "KeyDown" :> eventHandler[False],
