@@ -17,7 +17,11 @@ Paclet[
       Symbols -> {
         "WakaTime`WakaTime",
         "WakaTime`SetupWakatimeAsync",
-        "WakaTime`SendHeartbeat"
+        "WakaTime`SendHeartbeat",
+        "WakaTime`$LatestDashboardTime",
+        "WakaTime`$WakaTimeEnabled",
+        "WakaTime`$WakaTimeApiKey",
+        "WakaTime`$WakaTimeDebug"
       }
     },
     {"FrontEnd", Prepend->True}
