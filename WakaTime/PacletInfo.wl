@@ -6,7 +6,8 @@ Paclet[
   MathematicaVersion -> "12.2+",
   Description -> "WakaTime plugin for Wolfram systems",
   Loading -> Manual,
-  Creator -> "miRoox",
+  "Keywords" -> {"WakaTime", "Time Tracking"},
+  Creator -> "Yongan Lu <miroox@outlook.com>",
   URL -> "https://github.com/miRoox/wolfram-wakatime",
   Thumbnail -> "Logo.png",
   "Icon" -> "Logo.png",
@@ -18,5 +19,3 @@ Paclet[
     {"FrontEnd", Prepend->True}
   }
 ]
-
-
