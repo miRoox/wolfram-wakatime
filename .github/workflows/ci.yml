@@ -21,6 +21,8 @@ jobs:
     - name: Build
       id: build
       run: wolframscript scripts/build.wls
+    - name: Run Tests
+      run: wolframscript scripts/runtests.wls
     - name: Upload Paclet Archive File
       uses: actions/upload-artifact@v2
       with:
