@@ -10,6 +10,7 @@ BeginPackage["WakaTime`", {"GeneralUtilities`"}]
 WakaTime::usage="Common message placeholder.";
 $WakaTimeEnabled::usage="$WakaTimeEnabled indicate if WakaTime is enabled.";
 $WakaTimeApiKey::usage="$WakaTimeApiKey is your WakaTime API key.";
+$WakaTimeAlternativeApiKey::usage="$WakaTimeAlternativeApiKey is the alternative WakaTime API key for current session.";
 $WakaTimeDebug::usage="$WakaTimeDebug indicate whether WakaTime is on debug mode."
 $WakaTimeStatus::usage="$WakaTimeStatus represent status of WakaTime in current session."
 $LatestDashboardTime::usage="$LatestDashboardTime get latest dashboard time today."
@@ -45,7 +46,10 @@ SetAttributes[SendHeartbeat, {ReadProtected}]
 Begin["`Private`"]
 
 
-With[{PersistentSymbol=If[TrueQ[$VersionNumber>=12.3], PersistentSymbol, PersistentValue]},
+With[{
+    PersistentSymbol=If[TrueQ[$VersionNumber>=12.3], PersistentSymbol, PersistentValue],
+    validApiKeyQ=StringMatchQ[RegularExpression["^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$"], IgnoreCase -> True]
+  },
   PersistentSymbol["WakaTime/Enabled", "Installation"]=True;
   $WakaTimeEnabledOverriding=False;
   $WakaTimeEnabled:=$WakaTimeEnabled=PersistentSymbol["WakaTime/Enabled"];
@@ -58,8 +62,11 @@ With[{PersistentSymbol=If[TrueQ[$VersionNumber>=12.3], PersistentSymbol, Persist
   $WakaTimeApiKeyOverriding=False;
   $WakaTimeApiKey:=$WakaTimeApiKey=PersistentSymbol["WakaTime/APIKey"];
   $WakaTimeApiKey/:Set[$WakaTimeApiKey,val_]/;!TrueQ@$WakaTimeApiKeyOverriding:=Enclose@Block[{$WakaTimeApiKeyOverriding=True},
-    $WakaTimeApiKey=ConfirmBy[val, StringMatchQ[RegularExpression["^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$"], IgnoreCase -> True]];
+    $WakaTimeApiKey=ConfirmBy[val, validApiKeyQ];
     PersistentSymbol["WakaTime/APIKey"]=$WakaTimeApiKey
+  ];
+  $WakaTimeAlternativeApiKey=With[{envApiKey=Environment["WAKATIME_APIKEY"]},
+    If[!FailureQ@envApiKey && validApiKeyQ@envApiKey, envApiKey, None]
   ];
   PersistentSymbol["WakaTime/DebugMode", "Installation"]=False;
   $WakaTimeDebugOverriding=False;
@@ -176,6 +183,7 @@ iSendHeartbeat[assoc_Association]:=If[assoc@"entity"=!=$lastSentFile || UnixTime
     $cliPath,
     "--plugin", $pluginName,
     If[TrueQ@$WakaTimeDebug, "--verbose", Nothing],
+    If[StringQ@$WakaTimeAlternativeApiKey, Splice@{"--key", $WakaTimeAlternativeApiKey}, Nothing],
     resolveArguments@assoc
   };
   $lastSentTime=UnixTime[];
@@ -199,6 +207,7 @@ setupDashboardTimeUpdater[]:=If[!MatchQ[$updaterTask, _TaskObject] || $updaterTa
     {getter:=StringTrim@RunProcess[{
         $cliPath,
         "--plugin", $pluginName,
+        If[StringQ@$WakaTimeAlternativeApiKey, Splice@{"--key", $WakaTimeAlternativeApiKey}, Nothing],
         "--today"
       }, "StandardOutput"]
     },
