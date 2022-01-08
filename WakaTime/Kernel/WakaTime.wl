@@ -86,6 +86,7 @@ $pluginName:=$pluginName=SystemInformation["Kernel","ProductIDName"]<>"/"<>$Vers
 $wakatimeHome:=$wakatimeHome=Module[{$envWakatimeHome=Environment["WAKATIME_HOME"]},
   If[!FailureQ@$envWakatimeHome && DirectoryQ@$envWakatimeHome, $envWakatimeHome, $HomeDirectory]
 ];
+$cliDir:=$cliDir=FileNameJoin@{$wakatimeHome, ".wakatime"}
 $cliName:=$cliName=Module[{
     os=StringCases[$SystemID,{
       "MacOS"->"darwin",
@@ -100,7 +101,7 @@ $cliName:=$cliName=Module[{
   "wakatime-cli-"<>os<>"-"<>arch
 ];
 $cliPath:=$cliPath=Module[{ext=If[$OperatingSystem==="Windows", ".exe", ""]},
-  FileNameJoin@{$wakatimeHome, ".wakatime", $cliName<>ext}
+  FileNameJoin@{$cliDir, $cliName<>ext}
 ]
 (* TODO: install wakatime-cli automatically *)
 
@@ -141,7 +142,7 @@ tryInstallWakatime[assertData_, resolve_]:=With[
     HandlerFunctions -> <|
       "TaskFinished" -> (WithCleanup[
         $WakaTimeStatus="CLI Downloaded";
-        CopyFile[ExtractArchive[#File][[1]], $cliPath, OverwriteTarget->True];
+        ExtractArchive[#File, $cliDir, OverwriteTarget->True];
         resolve[],
         DeleteDirectory[dir, DeleteContents->True]
       ]&),
