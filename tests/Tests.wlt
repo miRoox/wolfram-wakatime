@@ -15,4 +15,14 @@ VerificationTest[
   TimeConstraint -> 600
 ]
 
+VerificationTest[
+  ReadString@SendHeartbeat["entity" -> $TestFileName, "category" -> "running tests"]
+  ,
+  EndOfFile
+  ,
+  TestID->"SendHeartbeat"
+  ,
+  TimeConstraint -> 60
+]
+
 EndTestSection[]
