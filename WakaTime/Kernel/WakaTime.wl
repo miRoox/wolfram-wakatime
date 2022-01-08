@@ -103,6 +103,59 @@ $cliPath:=$cliPath=Module[{ext=If[$OperatingSystem==="Windows", ".exe", ""]},
   FileNameJoin@{$wakatimeHome, ".wakatime", $cliName<>ext}
 ]
 (* TODO: install wakatime-cli automatically *)
+
+
+tryInstallLatestWakatime[resolve_]:=URLSubmit[
+  URL["https://api.github.com/repos/wakatime/wakatime-cli/releases/latest"],
+  HandlerFunctions -> <|
+   "TaskFinished" -> (handleLatestWakatimeApiResponse[#StatusCode, #ContentType, #Body, resolve] &),
+   "ConnectionFailed" -> (handleConnectionFailure[resolve]&)
+  |>,
+  HandlerFunctionsKeys -> {"ContentType", "Body", "StatusCode"},
+  TimeConstraint -> 10
+]
+handleLatestWakatimeApiResponse[status_, contentType_, body_, resolve_]:=If[TrueQ[status<400 && StringContainsQ[contentType, "application/json"]],
+  With[
+    {data=ImportString[First@body, "RawJSON"]},
+    $WakaTimeStatus="CLI Metadata Ready";
+    If[TrueQ[FileExistsQ@$cliPath], (*TODO: check version for update*)
+      resolve[],
+      tryInstallWakatime[
+        SelectFirst[data["assets"], StringStartsQ[#name, $cliName]&],
+        resolve
+      ]
+    ]
+  ],
+  handleConnectionFailure[resolve]
+]
+handleConnectionFailure[resolve_]:=If[TrueQ[FileExistsQ@$cliPath],
+  resolve[],
+  $WakaTimeStatus="Missing CLI"
+]
+tryInstallWakatime[assertData_, resolve_]:=With[
+  {dir=CreateDirectory[]},
+  {file=FileNameJoin@{dir, assertData["name"]}},
+  URLDownloadSubmit[
+    assertData["browser_download_url"],
+    file,
+    HandlerFunctions -> <|
+      "TaskFinished" -> (WithCleanup[
+        $WakaTimeStatus="CLI Downloaded";
+        CopyFile[ExtractArchive[#File][[1]], $cliPath, OverwriteTarget->True];
+        resolve[],
+        DeleteDirectory[dir, DeleteContents->True]
+      ]&),
+      "ConnectionFailed" -> (handleConnectionFailure[resolve]&)
+    |>,
+    HandlerFunctionsKeys -> {"File"},
+    TimeConstraint -> <|
+      "Connecting" -> 10,
+      "Reading" -> 600
+    |>
+  ]
+]
+
+
 $cfgPath:=$cfgPath=FileNameJoin@{$wakatimeHome, ".wakatime.cfg"}
 
 
@@ -203,8 +256,9 @@ setupFrontEnd[]:=If[$Notebooks && CurrentValue[$FrontEndSession, FrontEndEventAc
 ]
 
 
-SetupWakatimeAsync[]:=(
-(* TODO: install wakatime-cli automatically and prompt to enter API key *)
+SetupWakatimeAsync[]:=tryInstallLatestWakatime[wakatimeCliReady]
+wakatimeCliReady[]:=(
+  (* TODO: prompt to enter API key *)
   setupDashboardTimeUpdater[];
   setupPreRead[];
   setupFrontEnd[];
