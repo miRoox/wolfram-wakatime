@@ -25,8 +25,8 @@ palette=MakePalette[
     DynamicModule[{gotTime=None},
       PaneSelector[
         {
-          "Ready" -> Grid[{{
-            PaneSelector[
+          "Ready" -> Grid[{
+            {PaneSelector[
               {
                 True -> Tooltip[
                   Dynamic[$LatestDashboardTime],
@@ -35,10 +35,33 @@ palette=MakePalette[
                 False -> "Cannot get dashboard time!"
               },
               Dynamic[gotTime],
-              "Initialized"
-            ]
-          }}],
-          $Failed -> "Cannot setup WakaTime!"
+              Row@{"Waiting", ProgressIndicator[Appearance -> "Ellipsis"]}
+            ]},
+            {OpenerView[{
+              "WakaTime Config",
+              Grid[{
+                {
+                  Button[
+                    "Edit API Key",
+                    PromptApiKey[True],
+                    Method -> "Queued"
+                  ],
+                  SpanFromLeft
+                },
+                {
+                  Checkbox[Dynamic[$WakaTimeDebug]],
+                  "Debug Mode"
+                },
+                {
+                  Checkbox[Dynamic[$WakaTimeEnabled]],
+                  "WakaTime Enabled"
+                }
+              }, Alignment->{{Center, Left}, Baseline}]
+            },
+            Dynamic@CurrentValue[EvaluationNotebook[], {TaggingRules, "ConfigOpened"}]
+            ]}
+          }, Alignment->{Left, Baseline}],
+          "Missing CLI" -> "Missing WakaTime CLI!"
         },
         Dynamic[$WakaTimeStatus],
         Row@{"Initializing", ProgressIndicator[Appearance -> "Ellipsis"]}
@@ -56,7 +79,9 @@ palette=MakePalette[
   },
   "WakaTime",
   "NotebookOptions" -> {
-    TaggingRules -> {}
+    TaggingRules -> {
+      "ConfigOpened" -> False
+    }
   }
 ];
 Block[{$ContextPath=DeleteCases[$ContextPath, "WakaTime`"]},
