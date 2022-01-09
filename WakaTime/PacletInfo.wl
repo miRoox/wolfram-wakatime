@@ -2,7 +2,7 @@
 
 Paclet[
   Name -> "WakaTime",
-  Version -> "0.1.0",
+  Version -> "0.2.0",
   MathematicaVersion -> "12.2+",
   Description -> "WakaTime plugin for Wolfram systems",
   Loading -> Manual,
