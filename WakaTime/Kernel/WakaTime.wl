@@ -18,6 +18,7 @@ SetupWakatimeAsync::usage="SetupWakatimeAsync[] setup WakaTime environment async
 
 
 WakaTime::nocli="Cannot find WakaTime CLI.";
+WakaTime::badkey="`1` is not a valid API key.";
 
 
 Options[SendHeartbeat]:={
@@ -37,6 +38,7 @@ SetAttributes[$WakaTimeStatus, {ReadProtected}]
 SetAttributes[$LatestDashboardTime, {ReadProtected}]
 SetAttributes[SetupWakatimeAsync, {ReadProtected}]
 SetAttributes[SendHeartbeat, {ReadProtected}]
+SetAttributes[PromptApiKey, {ReadProtected}]
 
 
 (* ::Section:: *)
@@ -46,10 +48,9 @@ SetAttributes[SendHeartbeat, {ReadProtected}]
 Begin["`Private`"]
 
 
-With[{
-    PersistentSymbol=If[TrueQ[$VersionNumber>=12.3], PersistentSymbol, PersistentValue],
-    validApiKeyQ=StringMatchQ[RegularExpression["^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$"], IgnoreCase -> True]
-  },
+validApiKeyQ[s_String]:=StringMatchQ[s, RegularExpression["^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$"], IgnoreCase -> True]
+validApiKeyQ[_]=False
+With[{PersistentSymbol=If[TrueQ[$VersionNumber>=12.3], PersistentSymbol, PersistentValue]},
   PersistentSymbol["WakaTime/Enabled", "Installation"]=True;
   $WakaTimeEnabledOverriding=False;
   $WakaTimeEnabled:=$WakaTimeEnabled=PersistentSymbol["WakaTime/Enabled"];
@@ -200,6 +201,18 @@ resolveArguments[assoc_Association]:=Splice@Table[
 ]
 
 
+PromptApiKey[overwrite_:False]:=If[TrueQ@overwrite || (!validApiKeyQ@$WakaTimeAlternativeApiKey && !validApiKeyQ@$WakaTimeApiKey),
+  With[{input=InputString["Enter API Key:"]},
+    If[input=!=$Canceled,
+      If[validApiKeyQ[input],
+        $WakaTimeApiKey=input,
+        Message[WakaTime::badkey, input]
+      ]
+    ]
+  ]
+]
+
+
 $updaterTask = None
 setupDashboardTimeUpdater[]:=If[!MatchQ[$updaterTask, _TaskObject] || $updaterTask@"TaskStatus" =!= "Running",
   With[
@@ -268,7 +281,7 @@ setupFrontEnd[]:=If[$Notebooks && CurrentValue[$FrontEndSession, FrontEndEventAc
 
 SetupWakatimeAsync[]:=tryInstallLatestWakatime[wakatimeCliReady]
 wakatimeCliReady[]:=(
-  (* TODO: prompt to enter API key *)
+  PromptApiKey[];
   setupDashboardTimeUpdater[];
   setupPreRead[];
   setupFrontEnd[];
