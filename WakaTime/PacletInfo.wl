@@ -7,7 +7,7 @@ Paclet[
   Description -> "WakaTime plugin for Wolfram systems",
   Loading -> Manual,
   "Keywords" -> {"WakaTime", "Time Tracking"},
-  Creator -> "Yongan Lu <miroox@outlook.com>",
+  Creator -> "Yong-an Lu <miroox@outlook.com>",
   URL -> "https://github.com/miRoox/wolfram-wakatime",
   Thumbnail -> "Logo.png",
   "Icon" -> "Logo.png",
